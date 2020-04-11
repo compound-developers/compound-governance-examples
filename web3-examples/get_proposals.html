@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="../dependencies/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Get Proposals</title>
+</head>
+
+<body>
+  <div id="proposals"></div>
+</body>
+
+<script type="text/javascript" src="../dependencies/handlebars.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.2.6/dist/web3.min.js"></script>
+<script type="text/javascript" src="./gov-abi.js"></script>
+<script type="text/javascript">
+  const proposalListContainer = document.getElementById('proposals');
+  const proposalItemTemplate = Handlebars.compile(`
+    {{#each this}}
+      <div class="card">
+        <h4>{{ title }}</h4>
+        <p>{{ description }}</p>
+        <label>ID: </label>&nbsp;<span>{{ id }}</span>
+        <br />
+        <label>Votes For: </label>&nbsp;<span>{{ for_votes }}</span>
+        <br />
+        <label>Votes Against: </label>&nbsp;<span>{{ against_votes }}</span>
+        <br />
+        <label>Status: </label>&nbsp;<span>{{ state }}</span>
+      </div>
+    {{/each}}
+  `);
+
+  const enumerateProposalState = (state) => {
+    const proposalStates = ['Pending', 'Active', 'Canceled', 'Defeated', 'Succeeded', 'Queued', 'Expired', 'Executed'];
+    return proposalStates[state];
+  };
+
+  const web3 = new Web3('_YOUR_HTTP_PROVIDER_URL_');
+
+  // Ropsten Governor Alpha Contract
+  const governanceAddress = '0xc5bfed3bb38a3c4078d4f130f57ca4c560551d45';
+  const governanceAbi = window.governanceAbi;
+  const gov = new web3.eth.Contract(governanceAbi, governanceAddress);
+
+  (async () => {
+    const proposalCount = await gov.methods.proposalCount().call();
+
+    const proposalGets = [];
+    const proposalStateGets = [];
+    for (const i of Array.from(Array(parseInt(proposalCount)),(n,i) => i+1)) {
+      proposalGets.push(gov.methods.proposals(i).call());
+      proposalStateGets.push(gov.methods.state(i).call());
+    }
+
+    const proposals = await Promise.all(proposalGets);
+    const proposalStates = await Promise.all(proposalStateGets);
+    const proposalCreatedEvents = await gov.getPastEvents('ProposalCreated', {
+      fromBlock: 0,
+      toBlock: 'latest'
+    });
+
+    proposals.reverse();
+    proposalStates.reverse();
+    proposalCreatedEvents.reverse();
+
+    console.log('proposals', proposals)
+    console.log('proposalStates', proposalStates)
+    console.log('proposalCreatedEvents', proposalCreatedEvents)
+
+    proposals.forEach((p, i) => {
+      const { description } = proposalCreatedEvents[i].returnValues;
+      p.title = description.split(/# |\n/g)[1] || 'Untitled';
+      p.description = description.split(/# |\n/g)[2] || 'No description.';
+      p.state = enumerateProposalState(proposalStates[i]);
+      p.for_votes = (parseFloat(p.forVotes) / 1e18).toFixed(2);
+      p.against_votes = (parseFloat(p.againstVotes) / 1e18).toFixed(2);
+    });
+
+    proposalListContainer.innerHTML = proposalItemTemplate(proposals);
+  })();
+</script>
+
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="../dependencies/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Get COMP Holders</title>
+</head>
+<body>
+  <h1>COMP Holders</h1>
+  <div id="holders"></div>
+</body>
+
+<script type="text/javascript" src="../dependencies/handlebars.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.2.6/dist/web3.min.js"></script>
+<script type="text/javascript" src="./comp-abi.js"></script>
+<script type="text/javascript">
+  const holderListContainer = document.getElementById('holders');
+  const holderListTemplate = Handlebars.compile(`
+    {{#each this}}
+    <div class="card">
+      <h4>{{ address }}</h4>
+      <label>COMP Tokens: </label>&nbsp;<span>{{ balance }}</span>
+      <br />
+      <label>Delegate Address: </label>&nbsp;<span>{{ delegate }}</span>
+    </div>
+  {{/each}}
+  `);
+
+  const web3 = new Web3('_YOUR_HTTP_PROVIDER_URL_');
+
+  // Ropsten COMP Contract
+  const compAddress = '0x1fe16de955718cfab7a44605458ab023838c2793';
+  const compAbi = window.compAbi;
+  const comp = new web3.eth.Contract(compAbi, compAddress);
+
+  (async () => {
+    const transfers = await comp.getPastEvents('Transfer', {
+      fromBlock: 0,
+      toBlock: 'latest'
+    });
+
+    const pastHolders = [];
+    const pastHolderBalanceGets = [];
+    const delegateGets = [];
+    transfers.forEach((transfer, i) => {
+      const address = transfer.returnValues.to;
+
+      if (pastHolders.indexOf(address) > -1) return;
+
+      pastHolders.push(address);
+      pastHolderBalanceGets.push(comp.methods.balanceOf(address).call());
+      delegateGets.push(comp.methods.delegates(address).call());
+    });
+
+    const balances = await Promise.all(pastHolderBalanceGets);
+    const delegates = await Promise.all(delegateGets);
+    const holders = [];
+
+    balances.forEach((balance, i) => {
+      if (balance > 0) {
+        holders.push({
+          address: pastHolders[i],
+          balance: parseFloat(balance / 1e18).toFixed(4),
+          delegate: delegates[i] == 0 ? 'None' : delegates[i]
+        });
+      }
+    });
+
+    console.log(holders);
+
+    holderListContainer.innerHTML = holderListTemplate(holders);
+  })();
+
+</script>
+
+</html>

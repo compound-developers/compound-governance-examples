@@ -1,0 +1,41 @@
+html {
+  font-family: Tahoma, Geneva, sans-serif;
+}
+
+h1 {
+  display: block;
+  text-align: center;
+  margin: auto;
+}
+
+h4 {
+  font-size: 24px;
+  margin: 0px;
+  word-break: break-all;
+}
+
+select, button {
+  font-size: 24px;
+  margin: auto;
+  display: block;
+}
+
+p {
+  margin: 14px 0px;
+}
+
+label, span {
+  display: inline-block;
+  margin: 6px 0px;
+  word-break: break-all;
+}
+
+.card {
+  max-width: 400px;
+  font-size: 18px;
+  border: 1px solid #CCCCCC;
+  border-radius: 8px;
+  padding: 30px;
+  margin: 10px auto;
+  box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);
+}

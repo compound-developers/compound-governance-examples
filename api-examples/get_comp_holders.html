@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="../dependencies/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Get COMP Holders</title>
+</head>
+<body>
+  <h1>COMP Holders</h1>
+  <div id="holders"></div>
+</body>
+
+<script type="text/javascript" src="../dependencies/handlebars.min.js"></script>
+<script type="text/javascript">
+  const holderListContainer = document.getElementById('holders');
+  const holderListTemplate = Handlebars.compile(`
+    {{#each this}}
+    <div class="card">
+      <h4>{{ address }}</h4>
+      <label>COMP Tokens: </label>&nbsp;<span>{{ balance }}</span>
+      <br />
+      <label>Delegate Address: </label>&nbsp;<span>{{ delegate }}</span>
+    </div>
+  {{/each}}
+  `);
+
+  let requestParameters = {
+    "page_size": 100,            // number of results in a page
+    "network": "ropsten",        // mainnet, ropsten
+    // "page_number": 1,         // see subsequent response's `pagination_summary` to specify the next page
+    // addresses: ['0x123'],     // array of addresses to filter on
+    // order_by: 'votes',        // "votes", "balance", "proposals_created"
+    // with_history: true,       // boolean, returns a list of transaction history for the accounts
+  };
+
+  requestParameters = '?' + new URLSearchParams(requestParameters).toString();
+
+  fetch(`https://api.compound.finance/api/v2/governance/accounts${requestParameters}`)
+  .then((response) => response.json())
+  .then((result) => {
+    let accounts = result.accounts;
+    console.log(accounts);
+    let holders = [];
+    accounts.forEach((account) => {
+      holders.push({
+        "address": account.address,
+        "balance": parseFloat(account.balance).toFixed(4),
+        "delegate": account.delegate.address == 0 ? 'None' : account.delegate.address
+      });
+    });
+
+    console.log(holders);
+
+    holderListContainer.innerHTML = holderListTemplate(holders);
+  });
+
+</script>
+
+</html>

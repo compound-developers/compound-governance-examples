@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="../dependencies/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Get Ballots</title>
+</head>
+<body>
+  <h1 id="proposal">Proposal ID: </h1>
+  <div id="ballots"></div>
+</body>
+
+<script type="text/javascript" src="../dependencies/handlebars.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.2.6/dist/web3.min.js"></script>
+<script type="text/javascript" src="./gov-abi.js"></script>
+<script type="text/javascript">
+  const ballotListContainer = document.getElementById('ballots');
+  const ballotListTemplate = Handlebars.compile(`
+    {{#each this}}
+    <div class="card">
+      <h4>{{ address }}</h4>
+      <label>Support: </label>&nbsp;<span>{{ support }}</span>
+      <br />
+      <label>Votes: </label>&nbsp;<span>{{ votes }}</span>
+    </div>
+  {{/each}}
+  `);
+
+  const id = 1;
+  const proposalElement = document.getElementById('proposal');
+  proposalElement.innerText = proposalElement.innerText + id;
+
+  const web3 = new Web3('_YOUR_HTTP_PROVIDER_URL_');
+
+  // Ropsten Governor Alpha Contract
+  const governanceAddress = '0xc5bfed3bb38a3c4078d4f130f57ca4c560551d45';
+  const governanceAbi = window.governanceAbi;
+  const gov = new web3.eth.Contract(governanceAbi, governanceAddress);
+
+  (async () => {
+    const voteCastEvents = await gov.getPastEvents('VoteCast', {
+      fromBlock: 0,
+      toBlock: 'latest'
+    });
+
+    let submittedBallots = voteCastEvents;
+    let formattedBallots = [];
+    submittedBallots.forEach((ballot) => {
+      const { voter, support, votes, proposalId } = ballot.returnValues;
+      if (proposalId == id) {
+        formattedBallots.push({
+          blockNumber: ballot.blockNumber,
+          address: voter,
+          support: support ? 'In Favor' : 'Against',
+          votes: (parseFloat(votes) / 1e18).toFixed(2),
+        });
+      }
+    });
+
+    formattedBallots.reverse();
+    console.log(formattedBallots);
+
+    ballotListContainer.innerHTML = ballotListTemplate(formattedBallots);
+  })();
+</script>
+
+</html>
