@@ -27,9 +27,9 @@
   let requestParameters = {
     "page_size": 100,            // number of results in a page
     "network": "ropsten",        // mainnet, ropsten
+    "order_by": "balance",       // "votes", "balance", "proposals_created"
     // "page_number": 1,         // see subsequent response's `pagination_summary` to specify the next page
     // addresses: ['0x123'],     // array of addresses to filter on
-    // order_by: 'votes',        // "votes", "balance", "proposals_created"
     // with_history: true,       // boolean, returns a list of transaction history for the accounts
   };
 
@@ -48,8 +48,6 @@
         "delegate": account.delegate.address == 0 ? 'None' : account.delegate.address
       });
     });
-
-    console.log(holders);
 
     holderListContainer.innerHTML = holderListTemplate(holders);
   });

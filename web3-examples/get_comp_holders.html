@@ -66,6 +66,10 @@
       }
     });
 
+    holders.sort((a,b) => { 
+      return parseFloat(a.balance) < parseFloat(b.balance) ? 1 : -1;
+    });
+
     console.log(holders);
 
     holderListContainer.innerHTML = holderListTemplate(holders);
