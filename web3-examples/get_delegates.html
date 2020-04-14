@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="../dependencies/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Delegates</title>
+</head>
+<body>
+  <h1>Delegates</h1>
+  <div id="delegates"></div>
+</body>
+
+<script type="text/javascript" src="../dependencies/handlebars.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.2.6/dist/web3.min.js"></script>
+<script type="text/javascript" src="./comp-abi.js"></script>
+<script type="text/javascript">
+  const delegateListContainer = document.getElementById('delegates');
+  const delegateListTemplate = Handlebars.compile(`
+    {{#each this}}
+    <div class="card">
+      <h4>{{ delegate }}</h4>
+      <label>Voting Weight: </label>&nbsp;<span>{{ vote_weight }}</span>
+    </div>
+  {{/each}}
+  `);
+
+    const web3 = new Web3('_YOUR_HTTP_PROVIDER_URL_');
+
+  // Ropsten COMP Contract
+  const compAddress = '0x1fe16de955718cfab7a44605458ab023838c2793';
+  const compAbi = window.compAbi;
+  const comp = new web3.eth.Contract(compAbi, compAddress);
+
+  (async () => {
+    const delegations = await comp.getPastEvents('DelegateVotesChanged', {
+      fromBlock: 0,
+      toBlock: 'latest'
+    });
+
+    const delegateAccounts = {};
+
+    delegations.forEach(e => {
+      const { delegate, newBalance } = e.returnValues;
+      delegateAccounts[delegate] = newBalance;
+    });
+
+    const delegates = [];
+    Object.keys(delegateAccounts).forEach((account) => {
+      const voteWeight = +delegateAccounts[account];
+      if (voteWeight === 0) return;
+      delegates.push({
+        delegate: account,
+        vote_weight: voteWeight
+      });
+    });
+
+    delegates.sort((a, b) => {
+      return a.vote_weight < b.vote_weight ? 1 : -1;
+    });
+
+    delegates.forEach(d => {
+      d.vote_weight = (100 * ((d.vote_weight / 1e18) / 10000000)).toFixed(6) + '%';
+    });
+
+    console.log(delegates);
+
+    delegateListContainer.innerHTML = delegateListTemplate(delegates);
+  })();
+
+</script>
+
+</html>
