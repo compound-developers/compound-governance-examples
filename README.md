@@ -73,7 +73,7 @@ http-server -p 8080
 Then go to [http://localhost:8080/api-examples/get_proposals](http://localhost:8080/api-examples/get_proposals) in your web browser.
 
 ## Compound Governance Resources
-- [Governance Announcement](https://medium.com/compound-finance/compound-governance-5531f524cf68){:target="_blank"}
+- [Governance Announcement](https://medium.com/compound-finance/compound-governance-5531f524cf68)
 - [Governance Is Live Announcement](https://medium.com/compound-finance/compound-governance-decentralized-b18659f811e0)
 - [Compound Protocol Governance Documentation](https://compound.finance/docs/governance).
 - [Compound API Governance Service Documentation](https://compound.finance/docs/api#GovernanceService).
