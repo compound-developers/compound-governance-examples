@@ -12,45 +12,46 @@
 
 <script type="text/javascript" src="../dependencies/handlebars.min.js"></script>
 <script type="text/javascript">
-  const delegateListContainer = document.getElementById('delegates');
-  const delegateListTemplate = Handlebars.compile(`
-    {{#each this}}
-    <div class="card">
-      <h4>{{ delegate }}</h4>
-      <label>Voting Weight: </label>&nbsp;<span>{{ vote_weight }}</span>
-    </div>
-  {{/each}}
-  `);
+  window.addEventListener('load', (event) => {
+    const delegateListContainer = document.getElementById('delegates');
+    const delegateListTemplate = Handlebars.compile(`
+      {{#each this}}
+      <div class="card">
+        <h4>{{ delegate }}</h4>
+        <label>Voting Weight: </label>&nbsp;<span>{{ vote_weight }}</span>
+      </div>
+    {{/each}}
+    `);
 
-  let requestParameters = {
-    "page_size": 100,            // number of results in a page
-    "network": "ropsten",        // mainnet, ropsten
-    "order_by": "votes",         // "votes", "balance", "proposals_created"
-    // "page_number": 1,         // see subsequent response's `pagination_summary` to specify the next page
-    // addresses: ['0x123'],     // array of addresses to filter on
-    // with_history: true,       // boolean, returns a list of transaction history for the accounts
-  };
+    let requestParameters = {
+      "page_size": 100,            // number of results in a page
+      "network": "ropsten",        // mainnet, ropsten
+      "order_by": "votes",         // "votes", "balance", "proposals_created"
+      // "page_number": 1,         // see subsequent response's `pagination_summary` to specify the next page
+      // addresses: ['0x123'],     // array of addresses to filter on
+      // with_history: true,       // boolean, returns a list of transaction history for the accounts
+    };
 
-  requestParameters = '?' + new URLSearchParams(requestParameters).toString();
+    requestParameters = '?' + new URLSearchParams(requestParameters).toString();
 
-  fetch(`https://api.compound.finance/api/v2/governance/accounts${requestParameters}`)
-  .then((response) => response.json())
-  .then((result) => {
-    let accounts = result.accounts;
-    let delegates = [];
-    accounts.forEach((account) => {
-      if (account.vote_weight == 0) return;
-      delegates.push({
-        "delegate": account.address,
-        "vote_weight": (parseFloat(account.vote_weight) * 100).toFixed(6) + '%'
+    fetch(`https://api.compound.finance/api/v2/governance/accounts${requestParameters}`)
+    .then((response) => response.json())
+    .then((result) => {
+      let accounts = result.accounts;
+      let delegates = [];
+      accounts.forEach((account) => {
+        if (account.vote_weight == 0) return;
+        delegates.push({
+          "delegate": account.address,
+          "vote_weight": (parseFloat(account.vote_weight) * 100).toFixed(6) + '%'
+        });
       });
+
+      console.log(delegates);
+
+      delegateListContainer.innerHTML = delegateListTemplate(delegates);
     });
-
-    console.log(delegates);
-
-    delegateListContainer.innerHTML = delegateListTemplate(delegates);
   });
-
 </script>
 
 </html>

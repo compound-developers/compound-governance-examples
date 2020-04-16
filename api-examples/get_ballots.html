@@ -12,52 +12,53 @@
 
 <script type="text/javascript" src="../dependencies/handlebars.min.js"></script>
 <script type="text/javascript">
-  const ballotListContainer = document.getElementById('ballots');
-  const ballotListTemplate = Handlebars.compile(`
-    {{#each this}}
-    <div class="card">
-      <h4>{{ address }}</h4>
-      <label>Support: </label>&nbsp;<span>{{ support }}</span>
-      <br />
-      <label>Votes: </label>&nbsp;<span>{{ votes }}</span>
-    </div>
-  {{/each}}
-  `);
+  window.addEventListener('load', (event) => {
+    const ballotListContainer = document.getElementById('ballots');
+    const ballotListTemplate = Handlebars.compile(`
+      {{#each this}}
+      <div class="card">
+        <h4>{{ address }}</h4>
+        <label>Support: </label>&nbsp;<span>{{ support }}</span>
+        <br />
+        <label>Votes: </label>&nbsp;<span>{{ votes }}</span>
+      </div>
+    {{/each}}
+    `);
 
-  const proposal = 1;
-  const proposalElement = document.getElementById('proposal');
-  proposalElement.innerText = proposalElement.innerText + proposal;
+    const proposal = 1;
+    const proposalElement = document.getElementById('proposal');
+    proposalElement.innerText = proposalElement.innerText + proposal;
 
-  let requestParameters = {
-    "proposal_id": proposal,     // integer ID
-    "page_size": 100,            // number of results in a page
-    "network": "ropsten",        // mainnet, ropsten
-    // "account": "",            // filter by a specific voter's Ethereum address
-    // "support": "",            // filter by for or against with a boolean
-    // "with_proposal_data": "", // include proposal data in the response
-    // "page_number": 1,         // see subsequent response's `pagination_summary` to specify the next page
-  };
+    let requestParameters = {
+      "proposal_id": proposal,     // integer ID
+      "page_size": 100,            // number of results in a page
+      "network": "ropsten",        // mainnet, ropsten
+      // "account": "",            // filter by a specific voter's Ethereum address
+      // "support": "",            // filter by for or against with a boolean
+      // "with_proposal_data": "", // include proposal data in the response
+      // "page_number": 1,         // see subsequent response's `pagination_summary` to specify the next page
+    };
 
-  requestParameters = '?' + new URLSearchParams(requestParameters).toString();
+    requestParameters = '?' + new URLSearchParams(requestParameters).toString();
 
-  fetch(`https://api.compound.finance/api/v2/governance/proposal_vote_receipts${requestParameters}`)
-  .then((response) => response.json())
-  .then((result) => {
-    let submittedBallots = result.proposal_vote_receipts || [];
-    let formattedBallots = [];
-    submittedBallots.forEach((ballot) => {
-      formattedBallots.push({
-        address: ballot.voter.address,
-        support: ballot.support ? 'In Favor' : 'Against',
-        votes: parseFloat(ballot.votes).toFixed(2),
+    fetch(`https://api.compound.finance/api/v2/governance/proposal_vote_receipts${requestParameters}`)
+    .then((response) => response.json())
+    .then((result) => {
+      let submittedBallots = result.proposal_vote_receipts || [];
+      let formattedBallots = [];
+      submittedBallots.forEach((ballot) => {
+        formattedBallots.push({
+          address: ballot.voter.address,
+          support: ballot.support ? 'In Favor' : 'Against',
+          votes: parseFloat(ballot.votes).toFixed(2),
+        });
       });
+
+      console.log(formattedBallots);
+
+      ballotListContainer.innerHTML = ballotListTemplate(formattedBallots);
     });
-
-    console.log(formattedBallots);
-
-    ballotListContainer.innerHTML = ballotListTemplate(formattedBallots);
   });
-
 </script>
 
 </html>

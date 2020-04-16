@@ -13,46 +13,48 @@
 
 <script type="text/javascript" src="../dependencies/handlebars.min.js"></script>
 <script type="text/javascript">
-  const proposalListContainer = document.getElementById('proposals');
-  const proposalItemTemplate = Handlebars.compile(`
-    {{#each this}}
-      <div class="card">
-        <h4>{{ title }}</h4>
-        <p>{{ description }}</p>
-        <label>ID: </label>&nbsp;<span>{{ id }}</span>
-        <br />
-        <label>Votes For: </label>&nbsp;<span>{{ for_votes }}</span>
-        <br />
-        <label>Votes Against: </label>&nbsp;<span>{{ against_votes }}</span>
-        <br />
-        <label>Status: </label>&nbsp;<span>{{ state }}</span>
-      </div>
-    {{/each}}
-  `);
+  window.addEventListener('load', (event) => {
+    const proposalListContainer = document.getElementById('proposals');
+    const proposalItemTemplate = Handlebars.compile(`
+      {{#each this}}
+        <div class="card">
+          <h4>{{ title }}</h4>
+          <p>{{ description }}</p>
+          <label>ID: </label>&nbsp;<span>{{ id }}</span>
+          <br />
+          <label>Votes For: </label>&nbsp;<span>{{ for_votes }}</span>
+          <br />
+          <label>Votes Against: </label>&nbsp;<span>{{ against_votes }}</span>
+          <br />
+          <label>Status: </label>&nbsp;<span>{{ state }}</span>
+        </div>
+      {{/each}}
+    `);
 
-  let requestParameters = {
-    "network": "ropsten",   // mainnet, ropsten
-    "page_size": 100,       // integer, defaults to 10
-    // "proposal_ids": 1,   // an integer ID or array of IDs
-    // "state": "active",   //  "pending", "active", "canceled", "defeated", "succeeded", "queued", "expired", "executed"
-    // "with_detail": true, // boolean
-    // "page_number": 1,    // see subsequent response's `pagination_summary` to specify the next page
-  };
+    let requestParameters = {
+      "network": "ropsten",   // mainnet, ropsten
+      "page_size": 100,       // integer, defaults to 10
+      // "proposal_ids": 1,   // an integer ID or array of IDs
+      // "state": "active",   //  "pending", "active", "canceled", "defeated", "succeeded", "queued", "expired", "executed"
+      // "with_detail": true, // boolean
+      // "page_number": 1,    // see subsequent response's `pagination_summary` to specify the next page
+    };
 
-  requestParameters = '?' + new URLSearchParams(requestParameters).toString();
+    requestParameters = '?' + new URLSearchParams(requestParameters).toString();
 
-  fetch(`https://api.compound.finance/api/v2/governance/proposals${requestParameters}`)
-    .then((response) => response.json())
-    .then((result) => {
-      console.log(result);
-      const proposals = result.proposals || [];
-      proposals.forEach((p) => {
-        p.state = p.states[p.states.length-1].state
-        p.for_votes = parseFloat(p.for_votes).toFixed(2);
-        p.against_votes = parseFloat(p.against_votes).toFixed(2);
+    fetch(`https://api.compound.finance/api/v2/governance/proposals${requestParameters}`)
+      .then((response) => response.json())
+      .then((result) => {
+        console.log(result);
+        const proposals = result.proposals || [];
+        proposals.forEach((p) => {
+          p.state = p.states[p.states.length-1].state
+          p.for_votes = parseFloat(p.for_votes).toFixed(2);
+          p.against_votes = parseFloat(p.against_votes).toFixed(2);
+        });
+        proposalListContainer.innerHTML = proposalItemTemplate(proposals);
       });
-      proposalListContainer.innerHTML = proposalItemTemplate(proposals);
-    });
+  });
 </script>
 
 </html>

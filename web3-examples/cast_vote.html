@@ -36,114 +36,116 @@
 <script type="text/javascript" src="../dependencies/gov-abi.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.2.6/dist/web3.min.js"></script>
 <script type="text/javascript">
-  const web3Warning = document.getElementById('web3-warning');
-  const myAddress = document.getElementById('my-address');
-  const voteWeight = document.getElementById('vote-weight');
-  const proposalSelector = document.getElementById('proposal-selector');
-  const submit = document.getElementById('submit');
-  const loader = document.getElementById('loader');
-  const _for = document.getElementById('for');
-  const against = document.getElementById('against');
+  window.addEventListener('load', (event) => {
+    const web3Warning = document.getElementById('web3-warning');
+    const myAddress = document.getElementById('my-address');
+    const voteWeight = document.getElementById('vote-weight');
+    const proposalSelector = document.getElementById('proposal-selector');
+    const submit = document.getElementById('submit');
+    const loader = document.getElementById('loader');
+    const _for = document.getElementById('for');
+    const against = document.getElementById('against');
 
-  let myAccount, governanceAddress, governanceAbi, gov;
+    let myAccount, governanceAddress, governanceAbi, gov;
 
-  if (typeof window.ethereum === 'undefined') {
-    console.error('Client does not have an active Web3 provider or the example app is not being run from an HTTP server.');
-    console.log('Go here to install MetaMask: https://metamask.io/');
-    alert(
-      'You need a Web3 provider to run this page. ' + 
-      'Go here to install MetaMask:\n\n' +
-      'https://metamask.io/'
-    );
-    web3Warning.classList.remove('hidden');
-  } else {
-    main();
-  }
-
-  async function main() {
-    web3 = new Web3(web3.currentProvider);
-    const net = web3.currentProvider.networkVersion;
-
-    // This app only works with Ropsten or Main
-    if (net !== '1' && net !== '3') {
-      alert('Please select the Main or Ropsten network.');
-      return;
+    if (typeof window.ethereum === 'undefined') {
+      console.error('Client does not have an active Web3 provider or the example app is not being run from an HTTP server.');
+      console.log('Go here to install MetaMask: https://metamask.io/');
+      alert(
+        'You need a Web3 provider to run this page. ' + 
+        'Go here to install MetaMask:\n\n' +
+        'https://metamask.io/'
+      );
+      web3Warning.classList.remove('hidden');
+    } else {
+      main();
     }
 
-    const accounts = await window.ethereum.enable();
-    myAccount = accounts[0];
+    async function main() {
+      web3 = new Web3(web3.currentProvider);
+      const net = web3.currentProvider.networkVersion;
 
-    myAddress.innerText = myAccount;
-
-    // Ropsten Governor Contract
-    governanceAddress = '0xc5bfed3bb38a3c4078d4f130f57ca4c560551d45';
-    governanceAbi = window.governanceAbi;
-    gov = new web3.eth.Contract(governanceAbi, governanceAddress);
-
-    // Add a list of active proposals to the UI
-    getProposals();
-
-    // Get my account's vote weight
-    getMyVoteWeight(myAccount);
-
-    submit.onclick = async () => {
-      // An active proposal needs to be selected in the UI
-      if (proposalSelector.value < 1) {
-        alert('Select a proposal to vote in.');
+      // This app only works with Ropsten or Main
+      if (net !== '1' && net !== '3') {
+        alert('Please select the Main or Ropsten network.');
         return;
       }
 
-      // A vote choice needs to be selected in the UI
-      if (!_for.checked && !against.checked) {
-        alert('Select a vote option.');
-        return;
+      const accounts = await window.ethereum.enable();
+      myAccount = accounts[0];
+
+      myAddress.innerText = myAccount;
+
+      // Ropsten Governor Contract
+      governanceAddress = '0xc5bfed3bb38a3c4078d4f130f57ca4c560551d45';
+      governanceAbi = window.governanceAbi;
+      gov = new web3.eth.Contract(governanceAbi, governanceAddress);
+
+      // Add a list of active proposals to the UI
+      getProposals();
+
+      // Get my account's vote weight
+      getMyVoteWeight(myAccount);
+
+      submit.onclick = async () => {
+        // An active proposal needs to be selected in the UI
+        if (proposalSelector.value < 1) {
+          alert('Select a proposal to vote in.');
+          return;
+        }
+
+        // A vote choice needs to be selected in the UI
+        if (!_for.checked && !against.checked) {
+          alert('Select a vote option.');
+          return;
+        }
+
+        const proposal = proposalSelector.value;
+        const vote = _for.checked ? true : false;
+
+        loader.classList.remove('hidden');
+        try {
+          const tx = await gov.methods.castVote(proposal, vote).send({ from: myAccount });
+          console.log(tx);
+          alert(`Successfully voted ${vote ? 'for' : 'against'} Proposal ${proposal}`);
+          window.location.reload();
+        } catch(e) {
+          console.error(e);
+          alert(e.message);
+        }
+        loader.classList.add('hidden');
+      };
+
+      function getProposals() {
+        const network = net === '1' ? 'mainnet' : 'ropsten';
+        fetch(`https://api.compound.finance/api/v2/governance/proposals?network=${network}&state=active`)
+          .then((response) => response.json())
+          .then((result) => {
+            let proposals = result.proposals || [];
+            proposalSelector.options[proposalSelector.options.length] = new Option('Select Active Proposal', 0);
+            for (let i in proposals) {
+              proposalSelector.options[proposalSelector.options.length] = new Option(proposals[i].id, proposals[i].id);
+            }
+          });
       }
 
-      const proposal = proposalSelector.value;
-      const vote = _for.checked ? true : false;
-
-      loader.classList.remove('hidden');
-      try {
-        const tx = await gov.methods.castVote(proposal, vote).send({ from: myAccount });
-        console.log(tx);
-        alert(`Successfully voted ${vote ? 'for' : 'against'} Proposal ${proposal}`);
-        window.location.reload();
-      } catch(e) {
-        console.error(e);
-        alert(e.message);
+      function getMyVoteWeight(account) {
+        const network = net === '1' ? 'mainnet' : 'ropsten';
+        fetch(`https://api.compound.finance/api/v2/governance/accounts?network=${network}&addresses=${account}`)
+          .then((response) => response.json())
+          .then((result) => {
+            console.log(result);
+            let percentOfVotes = 'ERROR';
+            try {
+              percentOfVotes = `${parseFloat(result.accounts[0].vote_weight).toFixed(4)}%`;
+            } catch (e) {
+              console.error(e, result);
+            }
+            voteWeight.innerText = percentOfVotes;
+          });
       }
-      loader.classList.add('hidden');
-    };
-
-    function getProposals() {
-      const network = net === '1' ? 'mainnet' : 'ropsten';
-      fetch(`https://api.compound.finance/api/v2/governance/proposals?network=${network}&state=active`)
-        .then((response) => response.json())
-        .then((result) => {
-          let proposals = result.proposals || [];
-          proposalSelector.options[proposalSelector.options.length] = new Option('Select Active Proposal', 0);
-          for (let i in proposals) {
-            proposalSelector.options[proposalSelector.options.length] = new Option(proposals[i].id, proposals[i].id);
-          }
-        });
     }
-
-    function getMyVoteWeight(account) {
-      const network = net === '1' ? 'mainnet' : 'ropsten';
-      fetch(`https://api.compound.finance/api/v2/governance/accounts?network=${network}&addresses=${account}`)
-        .then((response) => response.json())
-        .then((result) => {
-          console.log(result);
-          let percentOfVotes = 'ERROR';
-          try {
-            percentOfVotes = `${parseFloat(result.accounts[0].vote_weight).toFixed(4)}%`;
-          } catch (e) {
-            console.error(e, result);
-          }
-          voteWeight.innerText = percentOfVotes;
-        });
-    }
-  }
+  });
 </script>
 
 </html>

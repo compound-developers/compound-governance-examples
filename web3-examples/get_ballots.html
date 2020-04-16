@@ -18,73 +18,75 @@
 <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.2.6/dist/web3.min.js"></script>
 <script type="text/javascript" src="../dependencies/gov-abi.js"></script>
 <script type="text/javascript">
-  const web3Warning = document.getElementById('web3-warning');
+  window.addEventListener('load', (event) => {
+    const web3Warning = document.getElementById('web3-warning');
 
-  if (typeof window.ethereum === 'undefined') {
-    console.error('Client does not have an active Web3 provider or the example app is not being run from an HTTP server.');
-    console.log('Go here to install MetaMask: https://metamask.io/');
-    alert(
-      'You need a Web3 provider to run this page. ' + 
-      'Go here to install MetaMask:\n\n' +
-      'https://metamask.io/'
-    );
-    web3Warning.classList.remove('hidden');
-  }
+    if (typeof window.ethereum === 'undefined') {
+      console.error('Client does not have an active Web3 provider or the example app is not being run from an HTTP server.');
+      console.log('Go here to install MetaMask: https://metamask.io/');
+      alert(
+        'You need a Web3 provider to run this page. ' + 
+        'Go here to install MetaMask:\n\n' +
+        'https://metamask.io/'
+      );
+      web3Warning.classList.remove('hidden');
+    }
 
-  web3 = new Web3(web3.currentProvider);
-  const net = web3.currentProvider.networkVersion;
+    web3 = new Web3(web3.currentProvider);
+    const net = web3.currentProvider.networkVersion;
 
-  // This app only works with Ropsten or Main
-  if (net !== '1' && net !== '3') {
-    alert('Please select the Main or Ropsten network.');
-  }
+    // This app only works with Ropsten or Main
+    if (net !== '1' && net !== '3') {
+      alert('Please select the Main or Ropsten network.');
+    }
 
-  const ballotListContainer = document.getElementById('ballots');
-  const ballotListTemplate = Handlebars.compile(`
-    {{#each this}}
-    <div class="card">
-      <h4>{{ address }}</h4>
-      <label>Support: </label>&nbsp;<span>{{ support }}</span>
-      <br />
-      <label>Votes: </label>&nbsp;<span>{{ votes }}</span>
-    </div>
-  {{/each}}
-  `);
+    const ballotListContainer = document.getElementById('ballots');
+    const ballotListTemplate = Handlebars.compile(`
+      {{#each this}}
+      <div class="card">
+        <h4>{{ address }}</h4>
+        <label>Support: </label>&nbsp;<span>{{ support }}</span>
+        <br />
+        <label>Votes: </label>&nbsp;<span>{{ votes }}</span>
+      </div>
+    {{/each}}
+    `);
 
-  const id = 1;
-  const proposalElement = document.getElementById('proposal');
-  proposalElement.innerText = proposalElement.innerText + id;
+    const id = 1;
+    const proposalElement = document.getElementById('proposal');
+    proposalElement.innerText = proposalElement.innerText + id;
 
-  // Ropsten Governor Alpha Contract
-  const governanceAddress = '0xc5bfed3bb38a3c4078d4f130f57ca4c560551d45';
-  const governanceAbi = window.governanceAbi;
-  const gov = new web3.eth.Contract(governanceAbi, governanceAddress);
+    // Ropsten Governor Alpha Contract
+    const governanceAddress = '0xc5bfed3bb38a3c4078d4f130f57ca4c560551d45';
+    const governanceAbi = window.governanceAbi;
+    const gov = new web3.eth.Contract(governanceAbi, governanceAddress);
 
-  (async () => {
-    const voteCastEvents = await gov.getPastEvents('VoteCast', {
-      fromBlock: 0,
-      toBlock: 'latest'
-    });
+    (async () => {
+      const voteCastEvents = await gov.getPastEvents('VoteCast', {
+        fromBlock: 0,
+        toBlock: 'latest'
+      });
 
-    let submittedBallots = voteCastEvents;
-    let formattedBallots = [];
-    submittedBallots.forEach((ballot) => {
-      const { voter, support, votes, proposalId } = ballot.returnValues;
-      if (proposalId == id) {
-        formattedBallots.push({
-          blockNumber: ballot.blockNumber,
-          address: voter,
-          support: support ? 'In Favor' : 'Against',
-          votes: (parseFloat(votes) / 1e18).toFixed(2),
-        });
-      }
-    });
+      let submittedBallots = voteCastEvents;
+      let formattedBallots = [];
+      submittedBallots.forEach((ballot) => {
+        const { voter, support, votes, proposalId } = ballot.returnValues;
+        if (proposalId == id) {
+          formattedBallots.push({
+            blockNumber: ballot.blockNumber,
+            address: voter,
+            support: support ? 'In Favor' : 'Against',
+            votes: (parseFloat(votes) / 1e18).toFixed(2),
+          });
+        }
+      });
 
-    formattedBallots.reverse();
-    console.log(formattedBallots);
+      formattedBallots.reverse();
+      console.log(formattedBallots);
 
-    ballotListContainer.innerHTML = ballotListTemplate(formattedBallots);
-  })();
+      ballotListContainer.innerHTML = ballotListTemplate(formattedBallots);
+    })();
+  });
 </script>
 
 </html>

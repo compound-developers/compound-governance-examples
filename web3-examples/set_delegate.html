@@ -29,77 +29,79 @@
 <script type="text/javascript" src="../dependencies/comp-abi.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.2.6/dist/web3.min.js"></script>
 <script type="text/javascript">
-  const web3Warning = document.getElementById('web3-warning');
-  const myAddress = document.getElementById('my-address');
-  const delegate = document.getElementById('current-delegate');
-  const newDelegate = document.getElementById('new-delegate');
-  const submit = document.getElementById('submit');
-  const loader = document.getElementById('loader');
-  let myAccount, compAddress, compAbi, comp;
+  window.addEventListener('load', (event) => {
+    const web3Warning = document.getElementById('web3-warning');
+    const myAddress = document.getElementById('my-address');
+    const delegate = document.getElementById('current-delegate');
+    const newDelegate = document.getElementById('new-delegate');
+    const submit = document.getElementById('submit');
+    const loader = document.getElementById('loader');
+    let myAccount, compAddress, compAbi, comp;
 
-  if (typeof window.ethereum === 'undefined') {
-    console.error('Client does not have an active Web3 provider or the example app is not being run from an HTTP server.');
-    console.log('Go here to install MetaMask: https://metamask.io/');
-    alert(
-      'You need a Web3 provider to run this page. ' + 
-      'Go here to install MetaMask:\n\n' +
-      'https://metamask.io/'
-    );
-    web3Warning.classList.remove('hidden');
-  } else {
-    main();
-  }
-
-  async function main() {
-    web3 = new Web3(web3.currentProvider);
-    let net = web3.currentProvider.networkVersion;
-
-    // This app only works with Ropsten or Main
-    if (net !== '1' && net !== '3') {
-      alert('Please select the Main or Ropsten network.');
-      return;
+    if (typeof window.ethereum === 'undefined') {
+      console.error('Client does not have an active Web3 provider or the example app is not being run from an HTTP server.');
+      console.log('Go here to install MetaMask: https://metamask.io/');
+      alert(
+        'You need a Web3 provider to run this page. ' + 
+        'Go here to install MetaMask:\n\n' +
+        'https://metamask.io/'
+      );
+      web3Warning.classList.remove('hidden');
+    } else {
+      main();
     }
 
-    const accounts = await window.ethereum.enable();
-    myAccount = accounts[0];
+    async function main() {
+      web3 = new Web3(web3.currentProvider);
+      let net = web3.currentProvider.networkVersion;
 
-    myAddress.innerText = myAccount;
-
-    // Ropsten COMP Contract
-    compAddress = '0x1fe16de955718cfab7a44605458ab023838c2793';
-    compAbi = window.compAbi;
-    comp = new web3.eth.Contract(compAbi, compAddress);
-
-    let currentDelegate;
-    try {
-      currentDelegate = await comp.methods.delegates(myAccount).call();
-    } catch (e) {
-      currentDelegate = 0;
-    }
-
-    delegate.innerText = currentDelegate == 0 ? 'None' : currentDelegate;
-
-    submit.onclick = async () => {
-      const delegateTo = newDelegate.value;
-
-      if (!delegateTo) {
-        alert('Invalid address to delegate your votes.');
+      // This app only works with Ropsten or Main
+      if (net !== '1' && net !== '3') {
+        alert('Please select the Main or Ropsten network.');
         return;
       }
 
-      loader.classList.remove('hidden');
+      const accounts = await window.ethereum.enable();
+      myAccount = accounts[0];
+
+      myAddress.innerText = myAccount;
+
+      // Ropsten COMP Contract
+      compAddress = '0x1fe16de955718cfab7a44605458ab023838c2793';
+      compAbi = window.compAbi;
+      comp = new web3.eth.Contract(compAbi, compAddress);
+
+      let currentDelegate;
       try {
-        const tx = await comp.methods.delegate(delegateTo).send({ from: myAccount });
-        console.log(tx);
-        alert(`Successfully Delagated to ${delegateTo}`);
-        window.location.reload();
-      } catch(e) {
-        console.error(e);
-        alert(e.message);
+        currentDelegate = await comp.methods.delegates(myAccount).call();
+      } catch (e) {
+        currentDelegate = 0;
       }
-      loader.classList.add('hidden');
-    };
-  }
+
+      delegate.innerText = currentDelegate == 0 ? 'None' : currentDelegate;
+
+      submit.onclick = async () => {
+        const delegateTo = newDelegate.value;
+
+        if (!delegateTo) {
+          alert('Invalid address to delegate your votes.');
+          return;
+        }
+
+        loader.classList.remove('hidden');
+        try {
+          const tx = await comp.methods.delegate(delegateTo).send({ from: myAccount });
+          console.log(tx);
+          alert(`Successfully Delagated to ${delegateTo}`);
+          window.location.reload();
+        } catch(e) {
+          console.error(e);
+          alert(e.message);
+        }
+        loader.classList.add('hidden');
+      };
+    }
+  });
 </script>
 
 </html>
