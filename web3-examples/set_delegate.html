@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="../dependencies/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Set Delegate</title>
+</head>
+<body>
+  <h1>Delegate My Votes</h1>
+  <div id="web3-warning" class="hidden warning">
+    Make sure the example app is being served with an HTTP server. <br />
+    Please install MetaMask: <a href="https://metamask.io/">https://metamask.io/</a>
+  </div>
+  <div class="card">
+    <label>My Address: </label>&nbsp;<span id="my-address"></span>
+    <br />
+    <label>My Current Delegate: </label>&nbsp;<span id="current-delegate"></span>
+    <br />
+    <label>My New Delegate: </label>&nbsp;<input id="new-delegate" type="text" />
+    <div id="loader" class="loader-container hidden">
+      <div class="loader"></div>
+      <span>Ethereum transactions may take a few minutes to be mined.</span>
+    </div>
+    <br />
+    <input id="submit" type="submit" value="Delegate" />
+  </div>
+</body>
+
+<script type="text/javascript" src="../dependencies/comp-abi.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.2.6/dist/web3.min.js"></script>
+<script type="text/javascript">
+  const web3Warning = document.getElementById('web3-warning');
+  const myAddress = document.getElementById('my-address');
+  const delegate = document.getElementById('current-delegate');
+  const newDelegate = document.getElementById('new-delegate');
+  const submit = document.getElementById('submit');
+  const loader = document.getElementById('loader');
+  let myAccount, compAddress, compAbi, comp;
+
+  if (typeof window.ethereum === 'undefined') {
+    console.error('Client does not have an active Web3 provider or the example app is not being run from an HTTP server.');
+    console.log('Go here to install MetaMask: https://metamask.io/');
+    alert(
+      'You need a Web3 provider to run this page. ' + 
+      'Go here to install MetaMask:\n\n' +
+      'https://metamask.io/'
+    );
+    web3Warning.classList.remove('hidden');
+  } else {
+    main();
+  }
+
+  async function main() {
+    web3 = new Web3(web3.currentProvider);
+    let net = web3.currentProvider.networkVersion;
+
+    // This app only works with Ropsten or Main
+    if (net !== '1' && net !== '3') {
+      alert('Please select the Main or Ropsten network.');
+      return;
+    }
+
+    const accounts = await window.ethereum.enable();
+    myAccount = accounts[0];
+
+    myAddress.innerText = myAccount;
+
+    // Ropsten COMP Contract
+    compAddress = '0x1fe16de955718cfab7a44605458ab023838c2793';
+    compAbi = window.compAbi;
+    comp = new web3.eth.Contract(compAbi, compAddress);
+
+    let currentDelegate;
+    try {
+      currentDelegate = await comp.methods.delegates(myAccount).call();
+    } catch (e) {
+      currentDelegate = 0;
+    }
+
+    delegate.innerText = currentDelegate == 0 ? 'None' : currentDelegate;
+
+    submit.onclick = async () => {
+      const delegateTo = newDelegate.value;
+
+      if (!delegateTo) {
+        alert('Invalid address to delegate your votes.');
+        return;
+      }
+
+      loader.classList.remove('hidden');
+      try {
+        const tx = await comp.methods.delegate(delegateTo).send({ from: myAccount });
+        console.log(tx);
+        alert(`Successfully Delagated to ${delegateTo}`);
+        window.location.reload();
+      } catch(e) {
+        console.error(e);
+        alert(e.message);
+      }
+      loader.classList.add('hidden');
+    };
+  }
+</script>
+
+</html>
