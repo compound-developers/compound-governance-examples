@@ -25,7 +25,7 @@ Learn more in the [Compound Protocol Governance Documentation](https://compound.
 
 The following code examples can be used in a Web3-enabled website.
 
-There are examples for querying the Ethereum blockchain directly as well as examples that use the [Compound REST API](https://compound.finance/docs/api). Operations that **get** can be done using either implementation. However **set** operations must be performed by writing to the blockchain, which requires ETH to be spent on gas fees.
+There are examples for querying the Ethereum blockchain directly as well as examples that use the [Compound REST API](https://compound.finance/docs/api?ref=github&user=ajb413&repo=compound-governance-examples). Operations that **get** can be done using either implementation. However **set** operations must be performed by writing to the blockchain with Web3, which requires ETH to be spent on gas fees.
 
 ### Get All COMP Token Holders
 - [Example Web Page (Compound API)](https://compound-developers.github.io/compound-governance-examples/api-examples/get_comp_holders)
@@ -75,6 +75,6 @@ Then go to [http://localhost:8080/api-examples/get_proposals](http://localhost:8
 ## Compound Governance Resources
 - [Governance Announcement](https://medium.com/compound-finance/compound-governance-5531f524cf68)
 - [Governance Is Live Announcement](https://medium.com/compound-finance/compound-governance-decentralized-b18659f811e0)
-- [Compound Protocol Governance Documentation](https://compound.finance/docs/governance).
-- [Compound API Governance Service Documentation](https://compound.finance/docs/api#GovernanceService).
-- [Compound Governance Explorer](https://compound.finance/governance)
+- [Compound Protocol Governance Documentation](https://compound.finance/docs/governance?ref=github&user=ajb413&repo=compound-governance-examples).
+- [Compound API Governance Service Documentation](https://compound.finance/docs/api#GovernanceService?ref=github&user=ajb413&repo=compound-governance-examples).
+- [Compound Governance Explorer](https://compound.finance/governance?ref=github&user=ajb413&repo=compound-governance-examples)
