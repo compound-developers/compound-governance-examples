@@ -13,7 +13,7 @@ Compound is an open-source, autonomous protocol built for developers, to unlock 
 
 ## What is Compound Protocol Governance?
 
-The Compound protocol is upgraded and configured in a decentrailized fashion. All changes (from supported assets, to system parameters) are decided by COMP token-holders using the voting system.
+The Compound protocol is upgraded and configured in a decentralized fashion. All changes (from supported assets, to system parameters) are decided by COMP token-holders using the voting system.
 
 Community members can create proposals or vote on proposals to modify the protocol. This is made possible by the [Compound Governance smart contract](https://github.com/compound-finance/compound-protocol/blob/master/contracts/Governance/GovernorAlpha.sol).
 
@@ -73,7 +73,7 @@ http-server -p 8080
 Then go to [http://localhost:8080/api-examples/get_proposals](http://localhost:8080/api-examples/get_proposals) in your web browser.
 
 ## Compound Governance Resources
-- [Governance Announcement](https://medium.com/compound-finance/compound-governance-5531f524cf68)
+- [Governance Announcement](https://medium.com/compound-finance/compound-governance-5531f524cf68){:target="_blank"}
 - [Governance Is Live Announcement](https://medium.com/compound-finance/compound-governance-decentralized-b18659f811e0)
 - [Compound Protocol Governance Documentation](https://compound.finance/docs/governance).
 - [Compound API Governance Service Documentation](https://compound.finance/docs/api#GovernanceService).
