@@ -7,7 +7,7 @@ Code examples for building your own interface for Compound Protocol Governance. 
 ## What is Compound?
 Compound is an open-source, autonomous protocol built for developers, to unlock a universe of new financial applications. Interest and borrowing, for the open financial system. Learn more on the website:
 
-<a href="https://compound.finance/?ref=github&user=ajb413&repo=compound-supply-examples">
+<a href="https://compound.finance/?ref=github&user=ajb413&repo=compound-governance-examples">
     <img alt="Compound Finance" src="https://raw.githubusercontent.com/ajb413/compound-interest-alerts/master/compound-finance-logo.png" width=260 height=60/>
 </a>
 
@@ -19,7 +19,7 @@ Community members can create proposals or vote on proposals to modify the protoc
 
 **In order to participate in governance, users do not need to hold any COMP token in their Ethereum wallet.** However, users need to have COMP **delegated** to their address. Delegation is a utility function in the [COMP ERC-20 token contract](https://github.com/compound-finance/compound-protocol/blob/master/contracts/Governance/Comp.sol).
 
-Learn more in the [Compound Protocol Governance Documentation](https://compound.finance/docs/governance).
+Learn more in the [Compound Protocol Governance Documentation](https://compound.finance/docs/governance?ref=github&user=ajb413&repo=compound-governance-examples).
 
 ## Examples
 
