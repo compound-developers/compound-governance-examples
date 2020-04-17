@@ -27,6 +27,8 @@ The following code examples can be used in a Web3-enabled website.
 
 There are examples for querying the Ethereum blockchain directly as well as examples that use the [Compound REST API](https://compound.finance/docs/api?ref=github&user=ajb413&repo=compound-governance-examples). Operations that **get** can be done using either implementation. However **set** operations must be performed by writing to the blockchain with Web3, which requires ETH to be spent on gas fees.
 
+For latest **contract addresses and ABIs**, see the [networks page](https://compound.finance/docs#networks) in the docs.
+
 ### Get All COMP Token Holders
 - [Example Web Page (Compound API)](https://compound-developers.github.io/compound-governance-examples/api-examples/get_comp_holders)
 - [Example Web Page (Web3 Only)](https://compound-developers.github.io/compound-governance-examples/web3-examples/get_comp_holders)
