@@ -2,7 +2,7 @@
 
 Code examples for building your own interface for Compound Protocol Governance. The COMP & Governance smart contracts are live on the Ethereum Main and Ropsten test networks.
 
-**[Full Quick Start Tutorial on the Compound Medium Blog](https://medium.com/compound-finance/)** 
+**[Full Quick Start Tutorial on the Compound Medium Blog](https://medium.com/compound-finance/building-a-governance-interface-474fc271588c)** 
 
 ## What is Compound?
 Compound is an open-source, autonomous protocol built for developers, to unlock a universe of new financial applications. Interest and borrowing, for the open financial system. Learn more on the website:
