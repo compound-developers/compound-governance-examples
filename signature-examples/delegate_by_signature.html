@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="../dependencies/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Delegate By Signature</title>
+</head>
+<body>
+  <h1>Delegate By Signature</h1>
+  <h2>Write Signature</h2>
+  <div id="web3-warning" class="hidden warning">
+    Make sure the example app is being served with an HTTP server. <br />
+    Please install MetaMask: <a href="https://metamask.io/">https://metamask.io/</a>
+  </div>
+  <div class="card">
+    <label>My Address: </label>&nbsp;<span id="my-address"></span>
+    <br />
+    <br />
+    <label>Current Delegatee: </label>&nbsp;<span id="my-delegatee"></span>
+    <br />
+    <br />
+    <label>Delegate To: </label>&nbsp;<input id="delegate-to" type="text" value="0x1234567890000000000000000000000123456789" />
+    <br />
+    <input id="sign" type="submit" value="Create Delegation Signature" />
+  </div>
+  <h2>Post Transaction</h2>
+  <div class="card">
+    <label>Delegatee: </label>&nbsp;<input id="delegatee" type="text" />
+    <br />
+    <label>Nonce: </label>&nbsp;<input id="nonce" type="text" />
+    <br />
+    <label>Expiry: </label>&nbsp;<input id="expiry" type="text" />
+    <br />
+    <label>Signature: </label>&nbsp;<input id="signature" type="text" />
+    <br />
+    <input id="delegate" type="submit" value="Delegate" />
+  </div>
+</body>
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.2.6/dist/web3.min.js"></script>
+<script type="text/javascript" src="../dependencies/comp-abi.js"></script>
+<script type="text/javascript">
+
+  const createDelegateBySigMessage = (compAddress, delegatee, expiry = 10e9, chainId = 1, nonce = 0) => {
+    const types = {
+      EIP712Domain: [
+        { name: 'name', type: 'string' },
+        { name: 'chainId', type: 'uint256' },
+        { name: 'verifyingContract', type: 'address' },
+      ],
+      Delegation: [
+        { name: 'delegatee', type: 'address' },
+        { name: 'nonce', type: 'uint256' },
+        { name: 'expiry', type: 'uint256' }
+      ]
+    };
+
+    const primaryType = 'Delegation';
+    const domain = { name: 'Compound', chainId, verifyingContract: compAddress };
+    const message = { delegatee, nonce, expiry };
+
+    return JSON.stringify({ types, primaryType, domain, message });
+  };
+
+  window.addEventListener('load', (event) => {
+    const web3Warning = document.getElementById('web3-warning');
+    const myAddress = document.getElementById('my-address');
+    const myDelegatee = document.getElementById('my-delegatee');
+    const delegateTo = document.getElementById('delegate-to');
+    const sign = document.getElementById('sign');
+    const signature = document.getElementById('signature');
+    const delegate = document.getElementById('delegate');
+    const delegatee = document.getElementById('delegatee');
+    const nonce = document.getElementById('nonce');
+    const expiry = document.getElementById('expiry');
+    const chainId = document.getElementById('chainId');
+
+    if (typeof window.ethereum === 'undefined') {
+      console.error('Client does not have an active Web3 provider or the example app is not being run from an HTTP server.');
+      console.log('Go here to install MetaMask: https://metamask.io/');
+      alert(
+        'You need a Web3 provider to run this page. ' + 
+        'Go here to install MetaMask:\n\n' +
+        'https://metamask.io/'
+      );
+      web3Warning.classList.remove('hidden');
+    } else {
+      main();
+    }
+
+    async function main() {
+      web3 = new Web3(web3.currentProvider);
+
+      const compAddress = '0xc00e94Cb662C3520282E6f5717214004A7f26888';
+      const compAbi = window.compAbi;
+      const comp = new web3.eth.Contract(compAbi, compAddress);
+
+      const accounts = await window.ethereum.enable();
+      const myAccount = accounts[0];
+      let currentDelegatee = await comp.methods.delegates(myAccount).call();
+
+      myAddress.innerText = myAccount;
+      myDelegatee.innerText = currentDelegatee;
+
+      sign.onclick = async () => {
+        const _delegatee = delegateTo.value;
+        const _nonce = await comp.methods.nonces(myAccount).call();
+        const _expiry = 10e9; // expiration of signature, in seconds since unix epoch
+        const _chainId = web3.currentProvider.networkVersion;
+        const msgParams = createDelegateBySigMessage(compAddress, _delegatee, _expiry, _chainId, _nonce);
+
+        web3.currentProvider.sendAsync({
+          method: 'eth_signTypedData_v4',
+          params: [ myAccount, msgParams ],
+          from: myAccount
+        }, async (err, result) => {
+          if (err) {
+            console.error('ERROR', err);
+            alert(err);
+            return;
+          } else if (result.error) {
+            console.error('ERROR', result.error.message);
+            alert(result.error.message);
+            return;
+          }
+
+          const sig = result.result;
+          delegatee.value = _delegatee;
+          nonce.value = _nonce;
+          expiry.value = _expiry;
+          signature.value = sig;
+
+          console.log('signature', sig);
+          console.log('msgParams', JSON.parse(msgParams));
+        });
+      };
+
+      delegate.onclick = async () => {
+        const _delegatee = delegatee.value;
+        const _nonce = nonce.value;
+        const _expiry = expiry.value;
+        const sig = signature.value;
+
+        const r = '0x' + sig.substring(2).substring(0, 64);
+        const s = '0x' + sig.substring(2).substring(64, 128);
+        const v = '0x' + sig.substring(2).substring(128, 130);
+
+        currentDelegatee = await comp.methods.delegates(myAccount).call();
+        myDelegatee.innerText = currentDelegatee;
+        console.log(`Now delegated to: ${currentDelegatee}`);
+
+        console.log('delegatee', _delegatee);
+        console.log('nonce', _nonce);
+        console.log('expiry', _expiry);
+        console.log('v', v);
+        console.log('r', r);
+        console.log('s', s);
+
+        const tx = await comp.methods.delegateBySig(_delegatee, _nonce, _expiry, v, r, s).send({
+          from: myAccount,
+          gasLimit: web3.utils.toHex(1000000),
+          gasPrice: web3.utils.toHex(25000000000),
+        });
+
+        console.log('delegateBySig Transaction', tx);
+
+        currentDelegatee = await comp.methods.delegates(myAccount).call();
+        myDelegatee.innerText = currentDelegatee;
+        console.log(`Now delegated to: ${currentDelegatee}`);
+      };
+    }
+  });
+</script>
+
+</html>
