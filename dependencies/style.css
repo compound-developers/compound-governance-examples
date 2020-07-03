@@ -2,10 +2,14 @@ html {
   font-family: Tahoma, Geneva, sans-serif;
 }
 
-h1 {
+h1, h2 {
   display: block;
   text-align: center;
   margin: auto;
+}
+
+h2 {
+  margin: 40px auto 20px auto;
 }
 
 h4 {
@@ -46,7 +50,7 @@ input[type="submit"] {
 }
 
 .card {
-  max-width: 400px;
+  max-width: 425px;
   font-size: 18px;
   border: 1px solid #CCCCCC;
   border-radius: 8px;
