@@ -75,6 +75,11 @@
     const expiry = document.getElementById('expiry');
     const chainId = document.getElementById('chainId');
 
+    const urlParamDelegate = new URLSearchParams(window.location.search).get('delegatee');
+    if (urlParamDelegate) {
+      delegateTo.value = urlParamDelegate;
+    }
+
     if (typeof window.ethereum === 'undefined') {
       console.error('Client does not have an active Web3 provider or the example app is not being run from an HTTP server.');
       console.log('Go here to install MetaMask: https://metamask.io/');
