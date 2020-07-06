@@ -96,6 +96,7 @@
     async function main() {
       web3 = new Web3(web3.currentProvider);
 
+      // Mainnet
       const compAddress = '0xc00e94Cb662C3520282E6f5717214004A7f26888';
       const compAbi = window.compAbi;
       const comp = new web3.eth.Contract(compAbi, compAddress);
