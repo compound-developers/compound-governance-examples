@@ -66,7 +66,7 @@ For latest **contract addresses and ABIs**, see the [networks page](https://comp
 - [Delegate By Signature Code Example](https://github.com/compound-developers/compound-governance-examples/blob/master/signature-examples/delegate_by_signature.html)
 - [Cast Vote By Signature Web Page](https://compound-developers.github.io/compound-governance-examples/signature-examples/vote_by_signature)
 - [Cast Vote By Signature Code Example](https://github.com/compound-developers/compound-governance-examples/blob/master/signature-examples/vote_by_signature.html)
-- [Check out the README for signatures](https://github.com/compound-developers/compound-governance-examples/blob/master/signature-examples/README.md)
+- **See the [README](https://github.com/compound-developers/compound-governance-examples/blob/master/signature-examples/README.md) for more context on signatures**
 
 ## Running
 

@@ -1,6 +1,6 @@
 # Compound Governance Signature Methods
 
-Users can delegate their voting rights or cast a vote on a proposal using an [EIP712](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md) typed structured data signatures.
+Users can delegate their voting rights or cast a vote on a proposal using [EIP712](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md) typed structured data signatures.
 
 ## Delegate By Signature
 
@@ -14,7 +14,7 @@ The "delegate to me" web page can be shared with a URL param to automatically se
 
 ## Cast Vote By Signature
 
-Users can vote on a governance proposal using a signed transaction. This allows users to sign a transaction locally (no gas fee) with their private key, and anyone can post it to the blockchain later.
+Users can [vote on a governance proposal](https://compound.finance/docs/governance#cast-vote-by-signature) ([source code](https://github.com/compound-finance/compound-protocol/blob/master/contracts/Governance/GovernorAlpha.sol#L252)) using a signed transaction. This allows users to sign a transaction locally (no gas fee) with their private key, and anyone can post it to the blockchain later.
 
 For a single proposal, the user will need to sign a "for" and an "against" vote in order to give a 3rd party full control of their vote on that proposal. Once the proposal vote signatures are created, they can be sent to another user. That other user can vote ("for" or "against") on behalf of the signatory for the single proposal.
 
