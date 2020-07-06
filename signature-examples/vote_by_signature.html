@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="../dependencies/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vote By Signature</title>
+</head>
+<body>
+  <h1>Vote By Signature</h1>
+  <h2>Write Signature</h2>
+  <div id="web3-warning" class="hidden warning">
+    Make sure the example app is being served with an HTTP server. <br />
+    Please install MetaMask: <a href="https://metamask.io/">https://metamask.io/</a>
+  </div>
+  <div class="card">
+    <label>My Address: </label>&nbsp;<span id="my-address"></span>
+    <br />
+    <br />
+    <label>Proposal: </label>&nbsp;<input id="proposal" type="text" />
+    <br />
+    <input id="sign" type="submit" value="Create Vote Signatures" />
+  </div>
+  <h2>Cast "For" Vote By Signature</h2>
+  <div class="card">
+    <label>Signature: </label>&nbsp;<input id="signature-for" type="text" />
+    <br />
+    <input id="vote-for" type="submit" value="Vote For" />
+  </div>
+  <h2>Cast "Against" Vote By Signature</h2>
+  <div class="card">
+    <label>Signature: </label>&nbsp;<input id="signature-against" type="text" />
+    <br />
+    <input id="vote-against" type="submit" value="Vote Against" />
+  </div>
+</body>
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.2.6/dist/web3.min.js"></script>
+<script type="text/javascript" src="../dependencies/gov-abi.js"></script>
+<script type="text/javascript">
+
+  const createVoteBySigMessage = (govAddress, proposalId, support, chainId = 1) => {
+    const types = {
+      EIP712Domain: [
+        { name: 'name', type: 'string' },
+        { name: 'chainId', type: 'uint256' },
+        { name: 'verifyingContract', type: 'address' },
+      ],
+      Ballot: [
+        { name: 'proposalId', type: 'uint256' },
+        { name: 'support', type: 'bool' }
+      ]
+    };
+
+    const primaryType = 'Ballot';
+    const domain = { name: 'Compound Governor Alpha', chainId, verifyingContract: govAddress };
+    support = !!support;
+    const message = { proposalId, support };
+
+    return JSON.stringify({ types, primaryType, domain, message });
+  };
+
+  const web3SignTypedData = (web3, account, messageParams) => {
+    return new Promise((resolve, reject) => {
+      web3.currentProvider.sendAsync({
+        method: 'eth_signTypedData_v4',
+        params: [ account, messageParams ],
+        from: account
+      }, async (err, result) => {
+        if (err) {
+          console.error('ERROR', err);
+          alert(err);
+          reject(err);
+        } else if (result.error) {
+          console.error('ERROR', result.error.message);
+          alert(result.error.message);
+          reject(result.error.message);
+        } else {
+          resolve(result.result);
+        }
+      });
+    });
+  };
+
+  window.addEventListener('load', (event) => {
+    const web3Warning = document.getElementById('web3-warning');
+    const myAddress = document.getElementById('my-address');
+    const proposal = document.getElementById('proposal');
+    const signatureFor = document.getElementById('signature-for');
+    const signatureAgainst = document.getElementById('signature-against');
+    const voteFor = document.getElementById('vote-for');
+    const voteAgainst = document.getElementById('vote-against');
+
+    if (typeof window.ethereum === 'undefined') {
+      console.error('Client does not have an active Web3 provider or the example app is not being run from an HTTP server.');
+      console.log('Go here to install MetaMask: https://metamask.io/');
+      alert(
+        'You need a Web3 provider to run this page. ' + 
+        'Go here to install MetaMask:\n\n' +
+        'https://metamask.io/'
+      );
+      web3Warning.classList.remove('hidden');
+    } else {
+      main();
+    }
+
+    async function main() {
+      web3 = new Web3(web3.currentProvider);
+
+      // Mainnet
+      const governanceAddress = '0xc0da01a04c3f3e0be433606045bb7017a7323e38';
+      const governanceAbi = window.governanceAbi;
+      const gov = new web3.eth.Contract(governanceAbi, governanceAddress);
+
+      const accounts = await window.ethereum.enable();
+      const myAccount = accounts[0];
+      const proposalCount = await gov.methods.proposalCount().call();
+
+      myAddress.innerText = myAccount;
+      proposal.value = proposalCount;
+
+      // Prompt the user to sign a 'for' and 'against' vote transaction
+      sign.onclick = async () => {
+        const _chainId = web3.currentProvider.networkVersion;
+        const msgParamsFor = createVoteBySigMessage(governanceAddress, proposal.value, true, _chainId);
+        const msgParamsAgainst = createVoteBySigMessage(governanceAddress, proposal.value, false, _chainId);
+
+        const sigFor = await web3SignTypedData(web3, myAccount, msgParamsFor);
+
+        signatureFor.value = sigFor;
+
+        const sigAgainst = await web3SignTypedData(web3, myAccount, msgParamsAgainst);
+
+        signatureAgainst.value = sigAgainst;
+      };
+
+      // Cast the 'for' vote by signature
+      voteFor.onclick = () => {
+        castVoteBySig(proposal.value, true, signatureFor.value);
+      };
+
+      // Cast the 'against' vote by signature
+      voteAgainst.onclick = () => {
+        castVoteBySig(proposal.value, false, signatureAgainst.value);
+      };
+
+      const castVoteBySig = async (proposalId, support, signature) => {
+        const r = '0x' + signature.substring(2).substring(0, 64);
+        const s = '0x' + signature.substring(2).substring(64, 128);
+        const v = '0x' + signature.substring(2).substring(128, 130);
+
+        console.log('v', v);
+        console.log('r', r);
+        console.log('s', s);
+
+        const tx = await gov.methods.castVoteBySig(proposalId, support, v, r, s).send({
+          from: myAccount,
+          gasLimit: web3.utils.toHex(1000000),
+          gasPrice: web3.utils.toHex(25000000000),
+        });
+
+        console.log('castVoteBySig Transaction', tx);
+      };
+    }
+  });
+</script>
+
+</html>
