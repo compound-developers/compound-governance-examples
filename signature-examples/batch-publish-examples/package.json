@@ -1,0 +1,9 @@
+{
+  "name": "batch-publish-example",
+  "version": "1.0.0",
+  "dependencies": {
+    "ethereumjs-abi": "^0.6.8",
+    "ethereumjs-util": "^7.0.2",
+    "web3": "^1.2.6"
+  }
+}
