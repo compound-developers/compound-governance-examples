@@ -1,9 +1,10 @@
-const EIP712 = require('./EIP712.js');
+const EIP712 = require('../EIP712.js');
 const Web3 = require('web3');
 const infura = process.env.infuraApiKey;
 // const web3 = new Web3(`https://mainnet.infura.io/v3/${infura}`);
 const web3 = new Web3('http://localhost:8545');
 
+// These keys are for testing only
 const pks = [
   "0xb8c1b5c1d81f9475fdf2e334517d29f733bdfa40682207571b12fc1142cbf329",
   "0x5c2313d8a6b81a83ad1df1bf12a193cbc51d5de84a000db734fd7a05aa63e5a2",
