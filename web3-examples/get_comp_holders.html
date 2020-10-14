@@ -19,6 +19,7 @@
 <script type="text/javascript" src="../dependencies/comp-abi.js"></script>
 <script type="text/javascript">
   window.addEventListener('load', (event) => {
+    let web3;
     const web3Warning = document.getElementById('web3-warning');
 
     if (typeof window.ethereum === 'undefined') {
@@ -32,7 +33,7 @@
       web3Warning.classList.remove('hidden');
     }
 
-    web3 = new Web3(web3.currentProvider);
+    web3 = new Web3(window.ethereum);
     const net = web3.currentProvider.networkVersion;
 
     // This app only works with Ropsten or Main

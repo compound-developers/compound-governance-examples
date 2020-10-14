@@ -63,6 +63,7 @@
   };
 
   window.addEventListener('load', (event) => {
+    let web3;
     const web3Warning = document.getElementById('web3-warning');
     const myAddress = document.getElementById('my-address');
     const myDelegatee = document.getElementById('my-delegatee');
@@ -94,7 +95,7 @@
     }
 
     async function main() {
-      web3 = new Web3(web3.currentProvider);
+      web3 = new Web3(window.ethereum);
 
       // Mainnet
       const compAddress = '0xc00e94Cb662C3520282E6f5717214004A7f26888';

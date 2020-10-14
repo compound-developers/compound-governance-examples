@@ -82,6 +82,7 @@
   };
 
   window.addEventListener('load', (event) => {
+    let web3;
     const web3Warning = document.getElementById('web3-warning');
     const myAddress = document.getElementById('my-address');
     const proposal = document.getElementById('proposal');
@@ -104,7 +105,7 @@
     }
 
     async function main() {
-      web3 = new Web3(web3.currentProvider);
+      web3 = new Web3(window.ethereum);
 
       // Mainnet
       const governanceAddress = '0xc0da01a04c3f3e0be433606045bb7017a7323e38';
