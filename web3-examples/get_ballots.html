@@ -49,16 +49,18 @@
         <label>Support: </label>&nbsp;<span>{{ support }}</span>
         <br />
         <label>Votes: </label>&nbsp;<span>{{ votes }}</span>
+        <br />
+        <label>Reason: </label>&nbsp;<p>{{ reason }}</p>
       </div>
     {{/each}}
     `);
 
-    const id = 1;
+    const id = 28;
     const proposalElement = document.getElementById('proposal');
     proposalElement.innerText = proposalElement.innerText + id;
 
-    // Ropsten Governor Alpha Contract
-    const governanceAddress = '0xc5bfed3bb38a3c4078d4f130f57ca4c560551d45';
+    // Ropsten Governor Bravo Contract
+    const governanceAddress = '0x087e98B40f988E0E1D1de476b2b8d2271Ac84B33';
     const governanceAbi = window.governanceAbi;
     const gov = new web3.eth.Contract(governanceAbi, governanceAddress);
 
@@ -71,13 +73,20 @@
       let submittedBallots = voteCastEvents;
       let formattedBallots = [];
       submittedBallots.forEach((ballot) => {
-        const { voter, support, votes, proposalId } = ballot.returnValues;
+        const { voter, support, votes, proposalId, reason } = ballot.returnValues;
+        let supportAsText = 'Against';
+        if (support == 1) {
+          supportAsText = 'In Favor';
+        } else if (support == 2) {
+          supportAsText = 'Abstain';
+        }
         if (proposalId == id) {
           formattedBallots.push({
             blockNumber: ballot.blockNumber,
             address: voter,
-            support: support ? 'In Favor' : 'Against',
+            support: supportAsText,
             votes: (parseFloat(votes) / 1e18).toFixed(2),
+            reason,
           });
         }
       });

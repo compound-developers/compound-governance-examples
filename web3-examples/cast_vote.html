@@ -23,6 +23,8 @@
     <label for="for">For</label>&nbsp;
     <input type="radio" id="against" name="vote" value="against">
     <label for="against">Against</label>
+    <input type="radio" id="abstain" name="vote" value="abstain">
+    <label for="abstain">Abstain</label>
     <br/ >
     <div id="loader" class="loader-container hidden">
       <div class="loader"></div>
@@ -46,6 +48,7 @@
     const loader = document.getElementById('loader');
     const _for = document.getElementById('for');
     const against = document.getElementById('against');
+    const abstain = document.getElementById('abstain');
 
     let myAccount, governanceAddress, governanceAbi, gov;
 
@@ -77,8 +80,8 @@
 
       myAddress.innerText = myAccount;
 
-      // Ropsten Governor Contract
-      governanceAddress = '0xc5bfed3bb38a3c4078d4f130f57ca4c560551d45';
+      // Ropsten Governor Bravo Contract
+      governanceAddress = '0x087e98B40f988E0E1D1de476b2b8d2271Ac84B33';
       governanceAbi = window.governanceAbi;
       gov = new web3.eth.Contract(governanceAbi, governanceAddress);
 
@@ -96,19 +99,27 @@
         }
 
         // A vote choice needs to be selected in the UI
-        if (!_for.checked && !against.checked) {
+        if (!_for.checked && !against.checked && !abstain.checked) {
           alert('Select a vote option.');
           return;
         }
 
         const proposal = proposalSelector.value;
-        const vote = _for.checked ? true : false;
+        let textType = 'against';
+        let vote = 0;
+        if (_for.checked) {
+          textType = 'for';
+          vote = 1;
+        } else if (abstain.checked) {
+          textType = 'abstain';
+          vote = 2;
+        }
 
         loader.classList.remove('hidden');
         try {
           const tx = await gov.methods.castVote(proposal, vote).send({ from: myAccount });
           console.log(tx);
-          alert(`Successfully voted ${vote ? 'for' : 'against'} Proposal ${proposal}`);
+          alert(`Successfully voted ${textType} Proposal ${proposal}`);
           window.location.reload();
         } catch(e) {
           console.error(e);

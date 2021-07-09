@@ -64,8 +64,8 @@
       return proposalStates[state];
     };
 
-    // Ropsten Governor Alpha Contract
-    const governanceAddress = '0xc5bfed3bb38a3c4078d4f130f57ca4c560551d45';
+    // Ropsten Governor Bravo Contract
+    const governanceAddress = '0x087e98B40f988E0E1D1de476b2b8d2271Ac84B33';
     const governanceAbi = window.governanceAbi;
     const gov = new web3.eth.Contract(governanceAbi, governanceAddress);
 
@@ -74,7 +74,9 @@
 
       const proposalGets = [];
       const proposalStateGets = [];
-      for (const i of Array.from(Array(parseInt(proposalCount)),(n,i) => i+1)) {
+
+      // Ropsten Gov Bravo begins at Proposal 23
+      for (const i of Array.from(Array(parseInt(proposalCount)),(n,i) => i+1).slice(22, Infinity)) {
         proposalGets.push(gov.methods.proposals(i).call());
         proposalStateGets.push(gov.methods.state(i).call());
       }
