@@ -31,13 +31,13 @@ For latest **contract addresses and ABIs**, see the [networks page](https://comp
 
 ### Get All COMP Token Holders
 - [Example Web Page (Compound API)](https://compound-developers.github.io/compound-governance-examples/api-examples/get_comp_holders)
-- [Example Web Page (Web3 Only)](https://compound-developers.github.io/compound-governance-examples/web3-examples/get_comp_holders)
+- [Example Web Page (Web3, Ropsten Only)](https://compound-developers.github.io/compound-governance-examples/web3-examples/get_comp_holders)
 - [Code Example (Compound API)](https://github.com/compound-developers/compound-governance-examples/blob/master/api-examples/get_comp_holders.html)
 - [Code Example (Web3 Only)](https://github.com/compound-developers/compound-governance-examples/blob/master/web3-examples/get_comp_holders.html)
 
 ### Get All Delegates
 - [Example Web Page (Compound API)](https://compound-developers.github.io/compound-governance-examples/api-examples/get_delegates)
-- [Example Web Page (Web3 Only)](https://compound-developers.github.io/compound-governance-examples/web3-examples/get_delegates)
+- [Example Web Page (Web3, Ropsten Only)](https://compound-developers.github.io/compound-governance-examples/web3-examples/get_delegates)
 - [Code Example (Compound API)](https://github.com/compound-developers/compound-governance-examples/blob/master/api-examples/get_delegates.html)
 - [Code Example (Web3 Only)](https://github.com/compound-developers/compound-governance-examples/blob/master/web3-examples/get_delegates.html)
 
