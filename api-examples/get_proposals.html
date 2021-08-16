@@ -32,7 +32,7 @@
     `);
 
     let requestParameters = {
-      "network": "ropsten",   // mainnet, ropsten
+      "network": "mainnet",   // mainnet, ropsten
       "page_size": 100,       // integer, defaults to 10
       // "proposal_ids": 1,   // an integer ID or array of IDs
       // "state": "active",   //  "pending", "active", "canceled", "defeated", "succeeded", "queued", "expired", "executed"
@@ -41,6 +41,8 @@
     };
 
     requestParameters = '?' + new URLSearchParams(requestParameters).toString();
+
+    proposalListContainer.innerHTML = '<p style="text-align:center;">Fetching proposals...</p>';
 
     fetch(`https://api.compound.finance/api/v2/governance/proposals${requestParameters}`)
       .then((response) => response.json())

@@ -36,7 +36,7 @@
 </body>
 
 <script type="text/javascript" src="../dependencies/gov-abi.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.2.6/dist/web3.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.4.0/dist/web3.min.js"></script>
 <script type="text/javascript">
   window.addEventListener('load', (event) => {
     let web3;
@@ -66,22 +66,25 @@
     }
 
     async function main() {
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }); // enable ethereum
       web3 = new Web3(window.ethereum);
-      const net = web3.currentProvider.networkVersion;
+      const net = +window.ethereum.chainId;
 
       // This app only works with Ropsten or Main
-      if (net !== '1' && net !== '3') {
+      if (net !== 1 && net !== 3) {
         alert('Please select the Main or Ropsten network.');
-        return;
       }
 
-      const accounts = await window.ethereum.enable();
+      if (net === 1) {
+        governanceAddress = '0xc0Da02939E1441F497fd74F78cE7Decb17B66529';
+      } else if (net === 3) {
+        governanceAddress = '0x087e98b40f988e0e1d1de476b2b8d2271ac84b33';
+      }
+
       myAccount = accounts[0];
 
       myAddress.innerText = myAccount;
 
-      // Ropsten Governor Bravo Contract
-      governanceAddress = '0x087e98B40f988E0E1D1de476b2b8d2271Ac84B33';
       governanceAbi = window.governanceAbi;
       gov = new web3.eth.Contract(governanceAbi, governanceAddress);
 
@@ -142,7 +145,7 @@
       }
 
       function getMyVoteWeight(account) {
-        const network = net === '1' ? 'mainnet' : 'ropsten';
+        const network = net === 1 ? 'mainnet' : 'ropsten';
         fetch(`https://api.compound.finance/api/v2/governance/accounts?network=${network}&addresses=${account}`)
           .then((response) => response.json())
           .then((result) => {
@@ -152,6 +155,7 @@
               percentOfVotes = `${parseFloat(result.accounts[0].vote_weight).toFixed(4)}%`;
             } catch (e) {
               console.error(e, result);
+              percentOfVotes = 0;
             }
             voteWeight.innerText = percentOfVotes;
           });

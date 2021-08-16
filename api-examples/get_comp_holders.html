@@ -27,7 +27,7 @@
 
     let requestParameters = {
       "page_size": 100,            // number of results in a page
-      "network": "ropsten",        // mainnet, ropsten
+      "network": "mainnet",        // mainnet, ropsten
       "order_by": "balance",       // "votes", "balance", "proposals_created"
       // "page_number": 1,         // see subsequent response's `pagination_summary` to specify the next page
       // addresses: ['0x123'],     // array of addresses to filter on
@@ -35,6 +35,8 @@
     };
 
     requestParameters = '?' + new URLSearchParams(requestParameters).toString();
+
+    holderListContainer.innerHTML = '<p style="text-align:center;">Fetching holders...</p>';
 
     fetch(`https://api.compound.finance/api/v2/governance/accounts${requestParameters}`)
     .then((response) => response.json())

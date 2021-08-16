@@ -27,7 +27,7 @@
 </body>
 
 <script type="text/javascript" src="../dependencies/comp-abi.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.2.6/dist/web3.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.4.0/dist/web3.min.js"></script>
 <script type="text/javascript">
   window.addEventListener('load', (event) => {
     let web3;
@@ -53,22 +53,25 @@
     }
 
     async function main() {
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }); // enable ethereum
       web3 = new Web3(window.ethereum);
-      let net = web3.currentProvider.networkVersion;
+      const net = +window.ethereum.chainId;
 
       // This app only works with Ropsten or Main
-      if (net !== '1' && net !== '3') {
+      if (net !== 1 && net !== 3) {
         alert('Please select the Main or Ropsten network.');
-        return;
       }
 
-      const accounts = await window.ethereum.enable();
+      if (net === 1) {
+        compAddress = '0xc00e94cb662c3520282e6f5717214004a7f26888';
+      } else if (net === 3) {
+        compAddress = '0xf76d4a441e4ba86a923ce32b89aff89dbccaa075';
+      }
+
       myAccount = accounts[0];
 
       myAddress.innerText = myAccount;
 
-      // Ropsten COMP Contract
-      compAddress = '0xf76d4a441e4ba86a923ce32b89aff89dbccaa075';
       compAbi = window.compAbi;
       comp = new web3.eth.Contract(compAbi, compAddress);
 
