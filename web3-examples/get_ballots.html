@@ -15,10 +15,10 @@
 </body>
 
 <script type="text/javascript" src="../dependencies/handlebars.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.2.6/dist/web3.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.4.0/dist/web3.min.js"></script>
 <script type="text/javascript" src="../dependencies/gov-abi.js"></script>
 <script type="text/javascript">
-  window.addEventListener('load', (event) => {
+  window.addEventListener('load', async (event) => {
     let web3;
     const web3Warning = document.getElementById('web3-warning');
 
@@ -33,12 +33,21 @@
       web3Warning.classList.remove('hidden');
     }
 
+    await window.ethereum.request({ method: 'eth_requestAccounts' }); // enable ethereum
     web3 = new Web3(window.ethereum);
-    const net = web3.currentProvider.networkVersion;
+    const net = +window.ethereum.chainId;
 
     // This app only works with Ropsten or Main
-    if (net !== '1' && net !== '3') {
+    if (net !== 1 && net !== 3) {
       alert('Please select the Main or Ropsten network.');
+    }
+
+    if (net === 1) {
+      governanceAddress = '0xc0Da02939E1441F497fd74F78cE7Decb17B66529';
+      netProposalId = 54;
+    } else if (net === 3) {
+      governanceAddress = '0x087e98b40f988e0e1d1de476b2b8d2271ac84b33';
+      netProposalId = 73;
     }
 
     const ballotListContainer = document.getElementById('ballots');
@@ -55,16 +64,17 @@
     {{/each}}
     `);
 
-    const id = 28;
+    const id = netProposalId;
     const proposalElement = document.getElementById('proposal');
     proposalElement.innerText = proposalElement.innerText + id;
 
-    // Ropsten Governor Bravo Contract
-    const governanceAddress = '0x087e98B40f988E0E1D1de476b2b8d2271Ac84B33';
     const governanceAbi = window.governanceAbi;
     const gov = new web3.eth.Contract(governanceAbi, governanceAddress);
 
     (async () => {
+      // Tell the user that we're waiting on a request to return data
+      ballotListContainer.innerHTML = '<p style="text-align:center;">Fetching ballots...</p>';
+
       const voteCastEvents = await gov.getPastEvents('VoteCast', {
         fromBlock: 0,
         toBlock: 'latest'
@@ -92,7 +102,7 @@
       });
 
       formattedBallots.reverse();
-      console.log(formattedBallots);
+      console.log('ballots', formattedBallots);
 
       ballotListContainer.innerHTML = ballotListTemplate(formattedBallots);
     })();

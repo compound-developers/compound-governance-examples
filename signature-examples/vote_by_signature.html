@@ -32,9 +32,15 @@
     <br />
     <input id="vote-against" type="submit" value="Vote Against" />
   </div>
+  <h2>Cast "Abstain" Vote By Signature</h2>
+  <div class="card">
+    <label>Signature: </label>&nbsp;<input id="signature-abstain" type="text" />
+    <br />
+    <input id="vote-abstain" type="submit" value="Vote Abstain" />
+  </div>
 </body>
 
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.2.6/dist/web3.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.4.0/dist/web3.min.js"></script>
 <script type="text/javascript" src="../dependencies/gov-abi.js"></script>
 <script type="text/javascript">
 
@@ -47,13 +53,13 @@
       ],
       Ballot: [
         { name: 'proposalId', type: 'uint256' },
-        { name: 'support', type: 'bool' }
+        { name: 'support', type: 'uint8' }
       ]
     };
 
     const primaryType = 'Ballot';
-    const domain = { name: 'Compound Governor Alpha', chainId, verifyingContract: govAddress };
-    support = !!support;
+    const domain = { name: 'Compound Governor Bravo', chainId, verifyingContract: govAddress };
+    support = support.toString();
     const message = { proposalId, support };
 
     return JSON.stringify({ types, primaryType, domain, message });
@@ -88,8 +94,10 @@
     const proposal = document.getElementById('proposal');
     const signatureFor = document.getElementById('signature-for');
     const signatureAgainst = document.getElementById('signature-against');
+    const signatureAbstain = document.getElementById('signature-abstain');
     const voteFor = document.getElementById('vote-for');
     const voteAgainst = document.getElementById('vote-against');
+    const voteAbstain = document.getElementById('vote-abstain');
 
     if (typeof window.ethereum === 'undefined') {
       console.error('Client does not have an active Web3 provider or the example app is not being run from an HTTP server.');
@@ -105,14 +113,24 @@
     }
 
     async function main() {
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }); // enable ethereum
       web3 = new Web3(window.ethereum);
+      const net = +window.ethereum.chainId;
 
-      // Mainnet
-      const governanceAddress = '0xc0da01a04c3f3e0be433606045bb7017a7323e38';
+      // This app only works with Ropsten or Main
+      if (net !== 1 && net !== 3) {
+        alert('Please select the Main or Ropsten network.');
+      }
+
+      if (net === 1) {
+        governanceAddress = '0xc0Da02939E1441F497fd74F78cE7Decb17B66529';
+      } else if (net === 3) {
+        governanceAddress = '0x087e98b40f988e0e1d1de476b2b8d2271ac84b33';
+      }
+
       const governanceAbi = window.governanceAbi;
       const gov = new web3.eth.Contract(governanceAbi, governanceAddress);
 
-      const accounts = await window.ethereum.enable();
       const myAccount = accounts[0];
       const proposalCount = await gov.methods.proposalCount().call();
 
@@ -122,8 +140,9 @@
       // Prompt the user to sign a 'for' and 'against' vote transaction
       sign.onclick = async () => {
         const _chainId = web3.currentProvider.networkVersion;
-        const msgParamsFor = createVoteBySigMessage(governanceAddress, proposal.value, true, _chainId);
-        const msgParamsAgainst = createVoteBySigMessage(governanceAddress, proposal.value, false, _chainId);
+        const msgParamsFor = createVoteBySigMessage(governanceAddress, proposal.value, 0, _chainId);
+        const msgParamsAgainst = createVoteBySigMessage(governanceAddress, proposal.value, 1, _chainId);
+        const msgParamsAbstain = createVoteBySigMessage(governanceAddress, proposal.value, 2, _chainId);
 
         const sigFor = await web3SignTypedData(web3, myAccount, msgParamsFor);
 
@@ -132,19 +151,29 @@
         const sigAgainst = await web3SignTypedData(web3, myAccount, msgParamsAgainst);
 
         signatureAgainst.value = sigAgainst;
+
+        const sigAbstain = await web3SignTypedData(web3, myAccount, msgParamsAbstain);
+
+        signatureAbstain.value = sigAbstain;
       };
 
       // Cast the 'for' vote by signature
       voteFor.onclick = () => {
-        castVoteBySig(proposal.value, true, signatureFor.value);
+        castVoteBySig(proposal.value, 0, signatureFor.value);
       };
 
       // Cast the 'against' vote by signature
       voteAgainst.onclick = () => {
-        castVoteBySig(proposal.value, false, signatureAgainst.value);
+        castVoteBySig(proposal.value, 1, signatureAgainst.value);
+      };
+
+      // Cast the 'abstain' vote by signature
+      voteAbstain.onclick = () => {
+        castVoteBySig(proposal.value, 2, signatureAgainst.value);
       };
 
       const castVoteBySig = async (proposalId, support, signature) => {
+        console.log(proposalId, support, signature)
         const r = '0x' + signature.substring(2).substring(0, 64);
         const s = '0x' + signature.substring(2).substring(64, 128);
         const v = '0x' + signature.substring(2).substring(128, 130);
@@ -155,8 +184,8 @@
 
         const tx = await gov.methods.castVoteBySig(proposalId, support, v, r, s).send({
           from: myAccount,
-          gasLimit: web3.utils.toHex(1000000),
-          gasPrice: web3.utils.toHex(25000000000),
+          // gasLimit: web3.utils.toHex(1000000),
+          // gasPrice: web3.utils.toHex(25000000000),
         });
 
         console.log('castVoteBySig Transaction', tx);

@@ -16,7 +16,7 @@ The "delegate to me" web page can be shared with a URL param to automatically se
 
 Users can [vote on a governance proposal](https://compound.finance/docs/governance#cast-vote-by-signature) ([source code](https://github.com/compound-finance/compound-protocol/blob/master/contracts/Governance/GovernorAlpha.sol#L252)) using a signed transaction. This allows users to sign a transaction locally (no gas fee) with their private key, and anyone can post it to the blockchain later.
 
-For a single proposal, the user will need to sign a "for" and an "against" vote in order to give a 3rd party full control of their vote on that proposal. Once the proposal vote signatures are created, they can be sent to another user. That other user can vote ("for" or "against") on behalf of the signatory for the single proposal.
+For a single proposal, the user will need to sign a "for", an "against", and an "abstain" vote in order to give a 3rd party full control of their vote on that proposal. Once the proposal vote signatures are created, they can be sent to another user. That other user can vote ("for", "against", "abstain") on behalf of the signatory for the single proposal.
 
 ## Running These Examples Locally
 

@@ -37,7 +37,7 @@
   </div>
 </body>
 
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.2.6/dist/web3.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.4.0/dist/web3.min.js"></script>
 <script type="text/javascript" src="../dependencies/comp-abi.js"></script>
 <script type="text/javascript">
 
@@ -95,14 +95,24 @@
     }
 
     async function main() {
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' }); // enable ethereum
       web3 = new Web3(window.ethereum);
+      const net = +window.ethereum.chainId;
 
-      // Mainnet
-      const compAddress = '0xc00e94Cb662C3520282E6f5717214004A7f26888';
+      // This app only works with Ropsten or Main
+      if (net !== 1 && net !== 3) {
+        alert('Please select the Main or Ropsten network.');
+      }
+
+      if (net === 1) {
+        compAddress = '0xc00e94cb662c3520282e6f5717214004a7f26888';
+      } else if (net === 3) {
+        compAddress = '0xf76d4a441e4ba86a923ce32b89aff89dbccaa075';
+      }
+
       const compAbi = window.compAbi;
       const comp = new web3.eth.Contract(compAbi, compAddress);
 
-      const accounts = await window.ethereum.enable();
       const myAccount = accounts[0];
       let currentDelegatee = await comp.methods.delegates(myAccount).call();
 
@@ -113,10 +123,10 @@
         const _delegatee = delegateTo.value;
         const _nonce = await comp.methods.nonces(myAccount).call();
         const _expiry = 10e9; // expiration of signature, in seconds since unix epoch
-        const _chainId = web3.currentProvider.networkVersion;
+        const _chainId = window.ethereum.chainId.toString();
         const msgParams = createDelegateBySigMessage(compAddress, _delegatee, _expiry, _chainId, _nonce);
 
-        web3.currentProvider.sendAsync({
+        window.ethereum.sendAsync({
           method: 'eth_signTypedData_v4',
           params: [ myAccount, msgParams ],
           from: myAccount

@@ -15,10 +15,10 @@
 </body>
 
 <script type="text/javascript" src="../dependencies/handlebars.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.2.6/dist/web3.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.4.0/dist/web3.min.js"></script>
 <script type="text/javascript" src="../dependencies/comp-abi.js"></script>
 <script type="text/javascript">
-  window.addEventListener('load', (event) => {
+  window.addEventListener('load', async (event) => {
     let web3;
     const web3Warning = document.getElementById('web3-warning');
 
@@ -33,12 +33,13 @@
       web3Warning.classList.remove('hidden');
     }
 
+    await window.ethereum.request({ method: 'eth_requestAccounts' }); // enable ethereum
     web3 = new Web3(window.ethereum);
-    const net = web3.currentProvider.networkVersion;
+    const net = +window.ethereum.chainId;
 
-    // This app only works with Ropsten or Main
-    if (net !== '1' && net !== '3') {
-      alert('Please select the Main or Ropsten network.');
+    // This example only works with Ropsten
+    if (net !== 3) {
+      alert('Please select the ROPSTEN network.');
     }
 
     const holderListContainer = document.getElementById('holders');
@@ -53,14 +54,17 @@
     {{/each}}
     `);
 
-    // Ropsten COMP Contract
     const compAddress = '0xf76d4a441e4ba86a923ce32b89aff89dbccaa075';
     const compAbi = window.compAbi;
     const comp = new web3.eth.Contract(compAbi, compAddress);
 
     (async () => {
+
+      // Tell the user that we're waiting on a request to return data
+      holderListContainer.innerHTML = '<p style="text-align:center;">Fetching holders...</p>';
+
       const transfers = await comp.getPastEvents('Transfer', {
-        fromBlock: 0,
+        fromBlock: 9728445,
         toBlock: 'latest'
       });
 

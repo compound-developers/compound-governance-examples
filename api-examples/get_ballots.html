@@ -32,7 +32,7 @@
     let requestParameters = {
       "proposal_id": proposal,     // integer ID
       "page_size": 100,            // number of results in a page
-      "network": "ropsten",        // mainnet, ropsten
+      "network": "mainnet",        // mainnet, ropsten
       // "account": "",            // filter by a specific voter's Ethereum address
       // "support": "",            // filter by for or against with a boolean
       // "with_proposal_data": "", // include proposal data in the response
@@ -40,6 +40,8 @@
     };
 
     requestParameters = '?' + new URLSearchParams(requestParameters).toString();
+
+    ballotListContainer.innerHTML = '<p style="text-align:center;">Fetching ballots...</p>';
 
     fetch(`https://api.compound.finance/api/v2/governance/proposal_vote_receipts${requestParameters}`)
     .then((response) => response.json())
