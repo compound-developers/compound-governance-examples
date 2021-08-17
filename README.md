@@ -15,7 +15,7 @@ Compound is an open-source, autonomous protocol built for developers, to unlock 
 
 The Compound protocol is upgraded and configured in a decentralized fashion. All changes (from supported assets, to system parameters) are decided by COMP token-holders using the voting system.
 
-Community members can create proposals or vote on proposals to modify the protocol. This is made possible by the [Compound Governance smart contract](https://github.com/compound-finance/compound-protocol/blob/master/contracts/Governance/GovernorAlpha.sol).
+Community members can create proposals or vote on proposals to modify the protocol. This is made possible by the [Compound Governance smart contract](https://github.com/compound-finance/compound-protocol/tree/master/contracts/Governance).
 
 **In order to participate in governance, users do not need to hold any COMP token in their Ethereum wallet.** However, users need to have COMP **delegated** to their address. Delegation is a utility function in the [COMP ERC-20 token contract](https://github.com/compound-finance/compound-protocol/blob/master/contracts/Governance/Comp.sol).
 
